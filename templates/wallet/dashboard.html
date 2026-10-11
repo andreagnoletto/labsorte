@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% block title %}Carteira{% endblock %}
+{% block content %}
+<h1 class="letreiro">Carteira de {{ user.username }}</h1>
+
+<div class="estatisticas">
+  <div class="estatistica"><span>Saldo</span><strong>F$ {{ wallet.balance }}</strong></div>
+  <div class="estatistica"><span>Apostado</span><strong>F$ {{ summary.staked|floatformat:2 }}</strong></div>
+  <div class="estatistica"><span>Recebido em prêmios</span><strong>F$ {{ summary.won|floatformat:2 }}</strong></div>
+  <div class="estatistica"><span>Resultado</span><strong class="{% if summary.net < 0 %}negativo{% elif summary.net > 0 %}positivo{% endif %}">F$ {{ summary.net|floatformat:2 }}</strong></div>
+  <div class="estatistica"><span>Apostas</span><strong>{{ summary.bets }}</strong></div>
+  <div class="estatistica"><span>Recargas</span><strong>{{ wallet.recharges }}</strong></div>
+</div>
+
+{% if summary.bets == 0 %}
+<section class="pule">
+  <h2>Você ainda não apostou</h2>
+  <p>Comece pelo <a href="{% url 'bicho:index' %}">jogo do bicho</a> ou pelo <a href="{% url 'casino:dice' %}">dado</a>. Depois de algumas rodadas, esta página compara o que você recebeu com o que a matemática previa.</p>
+</section>
+{% else %}
+<section class="pule" aria-labelledby="grafico-titulo">
+  <h2 id="grafico-titulo">Seu saldo ao longo das apostas</h2>
+  {% localize off %}
+  <svg class="grafico" viewBox="-4 -4 {{ chart.width|add:8 }} {{ chart.height|add:8 }}" role="img" aria-label="Saldo ao longo das últimas transações, de F$ {{ chart.min }} a F$ {{ chart.max }}">
+    {% if chart.baseline_y is not None %}
+      <line x1="0" y1="{{ chart.baseline_y }}" x2="{{ chart.width }}" y2="{{ chart.baseline_y }}" stroke="#c62828" stroke-width="2" stroke-dasharray="8 6"/>
+    {% endif %}
+    <polyline points="{{ chart.points }}" fill="none" stroke="#1f3a73" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>
+  {% endlocalize %}
+  <p class="ajuda">Linha azul: saldo após cada transação (últimas 200). Linha vermelha tracejada: as F$ {{ initial_bonus|floatformat:0 }} iniciais. Escala de F$ {{ chart.min }} a F$ {{ chart.max }}.</p>
+</section>
+
+<section class="pule" aria-labelledby="teoria-titulo">
+  <h2 id="teoria-titulo">Teoria × prática</h2>
+  {% if theory.settled_staked %}
+  <table class="dados">
+    <tbody>
+      <tr><td>Apostado em rodadas já decididas</td><td class="num">F$ {{ theory.settled_staked|floatformat:2 }}</td></tr>
+      <tr><td>O que a matemática previa de volta</td><td class="num">F$ {{ theory.expected_return|floatformat:2 }} ({{ theory.expected_rate|floatformat:3 }} por ficha)</td></tr>
+      <tr class="destaque"><td>O que você recebeu de volta</td><td class="num">F$ {{ theory.actual_return|floatformat:2 }} ({{ theory.actual_rate|floatformat:3 }} por ficha)</td></tr>
+    </tbody>
+  </table>
+  {% if theory.actual_return > theory.expected_return %}
+    <p class="destaque-texto">Por enquanto você está acima do previsto. Isso é normal em poucas apostas: a sorte manda no curto prazo. Quanto mais rodadas, mais o seu resultado se aproxima da linha da teoria, que fica abaixo de 1 ficha por ficha.</p>
+  {% else %}
+    <p class="destaque-texto">Como a teoria previa: de cada ficha apostada, uma parte ficou com a banca. Nenhuma estratégia de escolha de números muda essa média, porque ela vem da regra de pagamento, não dos palpites.</p>
+  {% endif %}
+  {% else %}
+    <p>Suas apostas ainda não foram decididas. No jogo do bicho, faça o sorteio para liquidar a extração.</p>
+  {% endif %}
+</section>
+
+<section class="pule" aria-labelledby="jogos-titulo">
+  <h2 id="jogos-titulo">Por jogo</h2>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Jogo</th><th class="num">Apostas</th><th class="num">Apostado</th><th class="num">Recebido</th><th class="num">Resultado</th><th class="num">Retorno real</th></tr></thead>
+    <tbody>
+    {% for code, row in summary.per_game.items %}
+      <tr>
+        <td>{{ row.label }}</td>
+        <td class="num">{{ row.bets }}</td>
+        <td class="num">F$ {{ row.staked|floatformat:2 }}</td>
+        <td class="num">F$ {{ row.won|floatformat:2 }}</td>
+        <td class="num {% if row.net < 0 %}negativo{% elif row.net > 0 %}positivo{% endif %}">F$ {{ row.net|floatformat:2 }}</td>
+        <td class="num">{% if row.return_rate is not None %}{{ row.return_rate|floatformat:3 }} por ficha{% else %}—{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="ajuda"><a href="{% url 'wallet:statement' %}">Ver o extrato completo</a></p>
+</section>
+{% endif %}
+
+<section class="pule" aria-labelledby="recarga-titulo">
+  <h2 id="recarga-titulo">Recarga educativa</h2>
+  <p>Acabaram as fichas? Aqui você pode pedir mais F$ {{ recharge_amount|floatformat:0 }} quantas vezes quiser. O contador de recargas fica visível de propósito: ele mostra quanto dinheiro novo um jogador de verdade teria precisado colocar para continuar.</p>
+  <form method="post" action="{% url 'wallet:recharge' %}">
+    {% csrf_token %}
+    <button type="submit" class="botao botao-linha">Pedir mais F$ {{ recharge_amount|floatformat:0 }}</button>
+  </form>
+</section>
+{% endblock %}

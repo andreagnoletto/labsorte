@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Roleta{% endblock %}
+{% block content %}
+<h1 class="letreiro">Roleta europeia</h1>
+<p class="capa-texto">Trinta e seis números pagam como se a roda tivesse trinta e seis casas. Mas ela tem trinta e sete: o zero. Essa casa verde é a vantagem da banca, {{ house_edge_pct|floatformat:1 }}% de tudo que é apostado, em qualquer tipo de aposta.</p>
+
+{% if result %}
+<section class="resultado feltro" aria-live="polite">
+  {{ wheel|json_script:"roleta-ordem" }}
+  <div class="roleta-palco">
+    <div class="roleta-roda" data-roleta="{{ result.details.number }}">
+      <div class="roda-ponteiro" aria-hidden="true"></div>
+      <div class="roda-bola" aria-hidden="true"><span></span></div>
+      <svg class="roda-disco" viewBox="-110 -110 220 220" aria-hidden="true"></svg>
+    </div>
+    <div class="roleta-leitura revelar">
+      <p class="ajuda">Saiu</p>
+      <p class="resultado-numero {{ result.details.color }}">{{ result.details.number }}</p>
+      <p>{{ result.details.color|capfirst }} · sua aposta: {{ result.details.label }}, F$ {{ result.stake|floatformat:0 }}</p>
+      {% if result.won %}
+        <p><span class="carimbo carimbo-ganhou">Ganhou F$ {{ result.payout }}</span></p>
+      {% else %}
+        <p><span class="carimbo carimbo-perdeu">Perdeu F$ {{ result.stake|floatformat:0 }}</span></p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<div class="duas-colunas">
+  <section aria-labelledby="mesa-titulo">
+    <h2 id="mesa-titulo" class="letreiro letreiro-medio">A mesa</h2>
+    <div class="roleta-mesa" role="group" aria-label="Números da roleta">
+      {% for number, cor in board %}
+        <button type="button" class="casa casa-{{ cor }}" data-numero="{{ number }}" aria-pressed="false">{{ number }}</button>
+      {% endfor %}
+    </div>
+    <p class="capa-texto ajuda" style="color: var(--papel)">Clique num número para apostar nele. Colunas: a 1ª tem 1, 4, 7…; a 2ª tem 2, 5, 8…; a 3ª tem 3, 6, 9…</p>
+  </section>
+
+  <section class="pule" aria-labelledby="aposta-titulo">
+    <h2 id="aposta-titulo">Fazer uma aposta</h2>
+    {% if user.is_authenticated %}
+      <form method="post" id="form-roleta" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<ul class="erro-lista">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        <div class="campo">
+          <span class="rotulo" id="rotulo-tipo">{{ form.bet_type.label }}</span>
+          <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-tipo">
+            {% for radio in form.bet_type %}<label>{{ radio.tag }} {{ radio.choice_label }}</label>{% endfor %}
+          </div>
+        </div>
+        <div class="campo">
+          <label for="{{ form.selection.id_for_label }}">{{ form.selection.label }}</label>
+          {{ form.selection }}
+          {% if form.selection.errors %}<p class="erro">{{ form.selection.errors|striptags }}</p>{% else %}<p class="ajuda">{{ form.selection.help_text }}</p>{% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.stake.id_for_label }}">{{ form.stake.label }}</label>
+          {{ form.stake }}
+          {% if form.stake.errors %}<p class="erro">{{ form.stake.errors|striptags }}</p>{% else %}<p class="ajuda">{{ form.stake.help_text }}</p>{% endif %}
+        </div>
+        <button type="submit" class="botao">Girar a roleta</button>
+      </form>
+    {% else %}
+      <p>Para apostar, <a href="{% url 'login' %}?next={% url 'casino:roulette' %}">entre</a> ou <a href="{% url 'core:signup' %}">crie uma conta</a>.</p>
+    {% endif %}
+  </section>
+</div>
+
+{% include "casino/_recent.html" %}
+
+<section class="pule" aria-labelledby="odds-titulo">
+  <h2 id="odds-titulo">Todas as apostas têm a mesma vantagem da banca</h2>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Aposta</th><th class="num">Casas que ganham</th><th class="num">Chance</th><th class="num">Paga</th><th class="num">Pagamento justo</th><th class="num">Fica com a banca</th></tr></thead>
+    <tbody>
+    {% for row in table %}
+      <tr>
+        <td>{{ row.label }}</td>
+        <td class="num">{{ row.probability.numerator }} de 37</td>
+        <td class="num">{{ row.probability_pct|floatformat:1 }}%</td>
+        <td class="num">{{ row.multiplier|floatformat:0 }}x</td>
+        <td class="num">{{ row.fair_multiplier|floatformat:2 }}x</td>
+        <td class="num banca-leva">{{ row.house_edge_pct|floatformat:1 }}%</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="ajuda">O pagamento justo seria 37 ÷ casas que ganham. A banca paga como se o zero não existisse.</p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.roleta-mesa { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 4px; padding: 4px; background: var(--tinta); border: 4px solid var(--papel); }
+.casa { font: 700 1rem var(--mono); padding: .55rem 0; border: 0; color: var(--papel); cursor: pointer; }
+.casa-vermelho { background: var(--vermelho); }
+.casa-preto { background: #222; }
+.casa-verde { background: var(--verde); }
+.casa[aria-pressed="true"] { outline: 4px solid var(--papel); outline-offset: -4px; }
+</style>
+<script>
+(function () {
+  var form = document.getElementById("form-roleta");
+  if (!form) return;
+  var selection = form.querySelector("[name=selection]");
+  var casas = document.querySelectorAll(".roleta-mesa .casa");
+  function marcar(n) { casas.forEach(function (c) { c.setAttribute("aria-pressed", c.dataset.numero === n ? "true" : "false"); }); }
+  casas.forEach(function (c) {
+    c.addEventListener("click", function () {
+      var tipo = form.querySelector("[name=bet_type][value=NUMBER]");
+      if (tipo) tipo.checked = true;
+      selection.value = c.dataset.numero;
+      marcar(c.dataset.numero);
+      selection.focus();
+    });
+  });
+  form.querySelectorAll("[name=bet_type]").forEach(function (r) {
+    r.addEventListener("change", function () { if (r.value !== "NUMBER") marcar(null); });
+  });
+  var atual = form.querySelector("[name=bet_type]:checked");
+  if (atual && atual.value === "NUMBER" && selection.value) marcar(String(parseInt(selection.value, 10)));
+})();
+</script>
+{% endblock %}

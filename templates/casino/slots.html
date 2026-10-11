@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Caça-níquel{% endblock %}
+{% block content %}
+<h1 class="letreiro">Caça-níquel</h1>
+<p class="capa-texto">Três rolos com {{ reel_size }} símbolos cada. Como a máquina é aberta, dá para contar todas as {{ reel_size }} × {{ reel_size }} × {{ reel_size }} combinações e calcular o retorno exato: {{ rtp_pct|floatformat:1 }}% do que entra volta como prêmio. Os outros {{ house_edge_pct|floatformat:1 }}% ficam com a banca.</p>
+
+{% if result %}
+<section class="resultado maquina" aria-live="polite">
+  {{ symbol_list|json_script:"simbolos-rolo" }}
+  <div class="maquina-painel" aria-hidden="true"><span class="maquina-luz"></span><span class="maquina-titulo">Jogo do Bixo · 3 rolos</span><span class="maquina-luz"></span></div>
+  <div class="rolos" data-caca-niquel role="img" aria-label="Saiu {{ result.details.reels|join:', ' }}">
+    {% for symbol in result.details.symbols %}<span class="rolo" data-final="{{ symbol }}">{{ symbol }}</span>{% endfor %}
+  </div>
+  <div class="revelar">
+    {% if result.won %}
+      <p><span class="carimbo carimbo-ganhou">{{ result.details.multiplier }}x · ganhou F$ {{ result.payout }}</span></p>
+    {% else %}
+      <p><span class="carimbo carimbo-perdeu">Perdeu F$ {{ result.stake|floatformat:0 }}</span></p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<div class="duas-colunas">
+  <section class="pule" aria-labelledby="girar-titulo">
+    <h2 id="girar-titulo">Girar</h2>
+    {% if user.is_authenticated %}
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<ul class="erro-lista">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        <div class="campo">
+          <label for="{{ form.stake.id_for_label }}">{{ form.stake.label }}</label>
+          {{ form.stake }}
+          {% if form.stake.errors %}<p class="erro">{{ form.stake.errors|striptags }}</p>{% else %}<p class="ajuda">{{ form.stake.help_text }}</p>{% endif %}
+        </div>
+        <button type="submit" class="botao botao-grande">Puxar a alavanca</button>
+      </form>
+    {% else %}
+      <p>Para jogar, <a href="{% url 'login' %}?next={% url 'casino:slots' %}">entre</a> ou <a href="{% url 'core:signup' %}">crie uma conta</a>.</p>
+    {% endif %}
+    <h3>O que tem em cada rolo</h3>
+    <table class="dados">
+      <thead><tr><th>Símbolo</th><th class="num">Posições no rolo</th></tr></thead>
+      <tbody>
+      {% for symbol, emoji, name, count in reel %}
+        <tr><td>{{ emoji }} {{ name }}</td><td class="num">{{ count }} de {{ reel_size }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="pule" aria-labelledby="premios-titulo">
+    <h2 id="premios-titulo">Tabela de prêmios</h2>
+    <div class="tabela-rolagem">
+    <table class="dados">
+      <thead><tr><th>Combinação</th><th class="num">Paga</th><th class="num">Chance</th><th class="num">Contribui com</th></tr></thead>
+      <tbody>
+      {% for row in paytable %}
+        <tr>
+          <td>{{ row.symbols }} <span class="ajuda" style="display:inline">{{ row.label }}</span></td>
+          <td class="num">{{ row.multiplier }}x</td>
+          <td class="num">{{ row.probability.numerator }} em {{ row.probability.denominator }}</td>
+          <td class="num">{{ row.contribution_pct|floatformat:2 }}%</td>
+        </tr>
+      {% endfor %}
+      <tr class="destaque"><td>Retorno total ao jogador</td><td></td><td></td><td class="num">{{ rtp_pct|floatformat:2 }}%</td></tr>
+      <tr class="destaque"><td>Fica com a banca</td><td></td><td></td><td class="num banca-leva">{{ house_edge_pct|floatformat:2 }}%</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="ajuda">Contribuição = chance × pagamento. A soma de todas as linhas é o retorno ao jogador (RTP). Máquinas reais escondem os rolos, mas a conta é a mesma.</p>
+  </section>
+</div>
+
+{% include "casino/_recent.html" %}
+{% endblock %}

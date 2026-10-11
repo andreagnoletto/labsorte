@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Dado{% endblock %}
+{% block content %}
+<h1 class="letreiro">Dado</h1>
+<p class="capa-texto">O jogo mais simples da casa. Escolha uma face: a chance de acertar é 1 em 6 ({{ probability_pct|floatformat:1 }}%). O pagamento justo seria {{ fair_multiplier }}x. A banca paga {{ multiplier|floatformat:0 }}x. A diferença, {{ house_edge_pct|floatformat:1 }}%, é o lucro dela a longo prazo.</p>
+
+{% if result %}
+<section class="resultado feltro" aria-live="polite">
+  <div class="dado-palco">
+    <div class="dado-cubo face-{{ result.details.result }}" data-dado="{{ result.details.result }}" role="img" aria-label="Dado mostrando a face {{ result.details.result }}">
+      <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+      <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+      <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+    </div>
+  </div>
+  <div class="revelar">
+    <p class="ajuda">Saiu</p>
+    <p class="resultado-numero">{{ result.details.result }}</p>
+    <p>Você apostou na face {{ result.details.pick }}, F$ {{ result.stake|floatformat:0 }}</p>
+    {% if result.won %}
+      <p><span class="carimbo carimbo-ganhou">Ganhou F$ {{ result.payout }}</span></p>
+    {% else %}
+      <p><span class="carimbo carimbo-perdeu">Perdeu F$ {{ result.stake|floatformat:0 }}</span></p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<div class="duas-colunas">
+  <section class="pule" aria-labelledby="jogar-titulo">
+    <h2 id="jogar-titulo">Jogar o dado</h2>
+    {% if user.is_authenticated %}
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<ul class="erro-lista">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        <div class="campo">
+          <span class="rotulo" id="rotulo-face">{{ form.pick.label }}</span>
+          <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-face">
+            {% for radio in form.pick %}<label>{{ radio.tag }} {{ radio.choice_label }}</label>{% endfor %}
+          </div>
+          {% if form.pick.errors %}<p class="erro">{{ form.pick.errors|striptags }}</p>{% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.stake.id_for_label }}">{{ form.stake.label }}</label>
+          {{ form.stake }}
+          {% if form.stake.errors %}<p class="erro">{{ form.stake.errors|striptags }}</p>{% else %}<p class="ajuda">{{ form.stake.help_text }}</p>{% endif %}
+        </div>
+        <button type="submit" class="botao">Jogar</button>
+      </form>
+    {% else %}
+      <p>Para jogar, <a href="{% url 'login' %}?next={% url 'casino:dice' %}">entre</a> ou <a href="{% url 'core:signup' %}">crie uma conta</a>.</p>
+    {% endif %}
+  </section>
+
+  <section class="pule" aria-labelledby="conta-titulo">
+    <h2 id="conta-titulo">A conta em seis jogadas</h2>
+    <p>Imagine seis jogadas de F$ 1, cada uma caindo numa face diferente. Você acerta uma vez e recebe F$ {{ multiplier|floatformat:0 }}. Gastou F$ 6.</p>
+    <table class="dados">
+      <tbody>
+        <tr><td>Apostado</td><td class="num">F$ 6</td></tr>
+        <tr><td>Recebido</td><td class="num">F$ {{ multiplier|floatformat:0 }}</td></tr>
+        <tr class="destaque"><td>Fica com a banca</td><td class="num banca-leva">F$ 1 ({{ house_edge_pct|floatformat:1 }}%)</td></tr>
+      </tbody>
+    </table>
+    <p class="ajuda">Em poucas jogadas a sorte manda. Em muitas, a média se impõe. Teste no <a href="{% url 'learn:simulator' %}">simulador de milhares de apostas</a>.</p>
+  </section>
+</div>
+
+{% include "casino/_recent.html" %}
+{% endblock %}

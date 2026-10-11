@@ -1,0 +1,59 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>document.documentElement.classList.add("js");</script>
+  <title>{% block title %}Início{% endblock %} · Jogo do Bixo</title>
+  <meta name="description" content="Simulador educativo de jogo do bicho, roleta, caça-níquel e dado com fichas fictícias.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231f3a73'/%3E%3Crect x='8' y='14' width='48' height='36' fill='%23f6e7a6'/%3E%3Ctext x='32' y='43' font-family='Impact,sans-serif' font-size='30' fill='%23c62828' text-anchor='middle'%3E25%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/jogos.css' %}">
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="banca">
+  <a class="banca-nome" href="{% url 'core:home' %}">Jogo do Bixo</a>
+  <nav class="banca-nav" aria-label="Seções">
+    <a href="{% url 'bicho:index' %}">Bicho</a>
+    <a href="{% url 'casino:roulette' %}">Roleta</a>
+    <a href="{% url 'casino:slots' %}">Caça-níquel</a>
+    <a href="{% url 'casino:dice' %}">Dado</a>
+    <a href="{% url 'learn:index' %}">Aprenda</a>
+  </nav>
+  <div class="banca-conta">
+    {% if user.is_authenticated %}
+      <a class="saldo" href="{% url 'wallet:dashboard' %}" title="Abrir carteira">
+        <span>saldo de {{ user.username }}</span>
+        <strong class="mono">F$ {{ wallet.balance }}</strong>
+      </a>
+      <form method="post" action="{% url 'logout' %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="botao botao-linha">Sair</button>
+      </form>
+    {% else %}
+      <a class="botao botao-linha" href="{% url 'login' %}">Entrar</a>
+      <a class="botao" href="{% url 'core:signup' %}">Criar conta</a>
+    {% endif %}
+  </div>
+</header>
+<p class="aviso">Simulador educativo. As fichas (F$) são fictícias: aqui ninguém ganha nem perde dinheiro de verdade.</p>
+
+<main id="conteudo" class="pagina">
+  {% if messages %}
+    <ul class="mensagens" aria-live="polite">
+      {% for message in messages %}
+        <li class="mensagem mensagem-{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="rodape">
+  <p>Jogo do Bixo é um projeto educativo sobre probabilidade e apostas. No Brasil, o jogo do bicho é contravenção penal (art. 58 da Lei das Contravenções Penais). Se o jogo está pesando na sua vida, o CVV atende pelo 188, de graça, 24 horas.</p>
+</footer>
+<script src="{% static 'js/jogos.js' %}" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

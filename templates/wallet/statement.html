@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Extrato{% endblock %}
+{% block content %}
+<h1 class="letreiro">Extrato</h1>
+<section class="pule">
+  <p>Toda movimentação de fichas, da mais recente para a mais antiga. <a href="{% url 'wallet:dashboard' %}">Voltar para a carteira</a>.</p>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Quando</th><th>Tipo</th><th>Jogo</th><th>Descrição</th><th class="num">Valor</th><th class="num">Saldo após</th></tr></thead>
+    <tbody>
+    {% for tx in page.object_list %}
+      <tr>
+        <td class="mono">{{ tx.created_at|date:"d/m/Y H:i" }}</td>
+        <td>{{ tx.get_kind_display }}</td>
+        <td>{% if tx.game %}{{ tx.get_game_display }}{% else %}—{% endif %}</td>
+        <td>{{ tx.description }}</td>
+        <td class="num {% if tx.amount < 0 %}negativo{% else %}positivo{% endif %}">{{ tx.amount|floatformat:2 }}</td>
+        <td class="num">F$ {{ tx.balance_after }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if page.has_other_pages %}
+    <p class="ajuda">
+      {% if page.has_previous %}<a href="?pagina={{ page.previous_page_number }}">Mais recentes</a>{% endif %}
+      Página {{ page.number }} de {{ page.paginator.num_pages }}
+      {% if page.has_next %}<a href="?pagina={{ page.next_page_number }}">Mais antigas</a>{% endif %}
+    </p>
+  {% endif %}
+</section>
+{% endblock %}

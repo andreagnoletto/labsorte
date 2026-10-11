@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Criar conta{% endblock %}
+{% block content %}
+<section class="pule formulario-conta">
+  <h1 class="letreiro letreiro-medio">Criar conta</h1>
+  <p>Você recebe fichas fictícias para estudar. Não pedimos e-mail nem dados pessoais.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="campo">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.errors %}<p class="erro">{{ field.errors|striptags }}</p>{% endif %}
+        {% if field.help_text %}<p class="ajuda">{{ field.help_text|safe }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="botao">Criar conta</button>
+  </form>
+  <p class="ajuda">Já tem conta? <a href="{% url 'login' %}">Entrar</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Lei e jogo responsável{% endblock %}
+{% block content %}
+<h1 class="letreiro">Lei e jogo responsável</h1>
+{% include "learn/_nav.html" with current="legal" %}
+
+<section class="pule">
+  <h2>O que a lei brasileira diz</h2>
+  <ul class="lista-simples">
+    <li><strong>Jogo do bicho</strong>: é contravenção penal desde 1941. O artigo 58 da Lei das Contravenções Penais (Decreto-Lei 3.688/1941) pune quem explora ou realiza o jogo, com prisão simples e multa, e prevê punição também para quem aposta. Por ser ilegal, o apostador não tem a quem recorrer se a banca não pagar.</li>
+    <li><strong>Cassinos</strong>: proibidos no país desde 1946 (Decreto-Lei 9.215/1946). Roleta e caça-níquel operados no Brasil são clandestinos.</li>
+    <li><strong>Apostas de quota fixa ("bets")</strong>: criadas pela Lei 13.756/2018 e regulamentadas pela Lei 14.790/2023. Só podem operar empresas autorizadas pelo Ministério da Fazenda, com regras de publicidade, proibição para menores de 18 anos e mecanismos de autoexclusão.</li>
+    <li><strong>Loterias federais</strong>: legais e operadas pela Caixa. Também têm vantagem da casa: nas loterias de prognósticos, menos da metade do arrecadado volta em prêmios.</li>
+  </ul>
+  <p class="ajuda">Este resumo é educativo e pode ficar desatualizado. Para decisões reais, consulte a legislação vigente ou um profissional.</p>
+</section>
+
+<section class="pule">
+  <h2>Quando o jogo deixa de ser jogo</h2>
+  <p>O transtorno do jogo é reconhecido pela Organização Mundial da Saúde como um problema de saúde, não de caráter. Alguns sinais de alerta:</p>
+  <ul class="lista-simples">
+    <li>Apostar mais do que planejou, ou dinheiro de contas, aluguel e comida.</li>
+    <li>Voltar para "recuperar" o que perdeu (o que a matemática desta seção mostra ser impossível na média).</li>
+    <li>Mentir sobre quanto joga, ou esconder apostas de quem convive com você.</li>
+    <li>Pensar no jogo o tempo todo, ficar irritado ou ansioso quando não pode jogar.</li>
+    <li>Pedir empréstimos ou vender coisas para continuar apostando.</li>
+  </ul>
+</section>
+
+<section class="pule">
+  <h2>Onde buscar ajuda, de graça</h2>
+  <ul class="lista-simples">
+    <li><strong>CVV</strong>: ligue <strong class="mono">188</strong>, 24 horas, sem custo, ou acesse cvv.org.br. Para qualquer momento de angústia.</li>
+    <li><strong>Jogadores Anônimos</strong>: grupos de apoio mútuo em várias cidades, presenciais e on-line, em jogadoresanonimos.com.br.</li>
+    <li><strong>SUS</strong>: os CAPS (Centros de Atenção Psicossocial) atendem transtornos relacionados a jogo. Procure a unidade de saúde mais próxima.</li>
+    <li><strong>Autoexclusão</strong>: nas plataformas de aposta legalizadas, você pode pedir o bloqueio da própria conta por um período.</li>
+  </ul>
+  <p class="destaque-texto">Este site usa fichas de mentira justamente para que a lição custe zero. Se as fichas fictícias já parecem dar vontade de "recuperar", vale conversar com alguém.</p>
+</section>
+{% endblock %}

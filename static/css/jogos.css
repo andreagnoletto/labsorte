@@ -1,0 +1,144 @@
+/* Jogo do Bixo — palcos dos jogos: feltro da mesa, roda, máquina, dado e poste.
+   Depende dos tokens definidos em app.css. */
+
+:root {
+  --feltro: #14532d;
+  --feltro-escuro: #0d3b20;
+  --madeira: #4a2c12;
+  --dourado: #d4a017;
+  --cabine: #7a1f1f;
+}
+
+/* Com JavaScript, o resultado fica escondido até a encenação terminar. */
+.js .resultado:not(.revelado) .revelar { visibility: hidden; }
+.js [data-animar-sorteio] .premio:not(.revelado) .animal { visibility: hidden; }
+.js [data-animar-sorteio] .premio:not(.girando):not(.revelado) .milhar { visibility: hidden; }
+.js [data-animar-sorteio]:not(.revelado) .poste-cabeca { visibility: hidden; }
+
+.revelado .carimbo { animation: carimbar .4s cubic-bezier(.2, .9, .3, 1.35) both; }
+@keyframes carimbar {
+  from { transform: rotate(-4deg) scale(1.9); opacity: 0; }
+  to { transform: rotate(-4deg) scale(1); opacity: 1; }
+}
+
+/* ---- Mesa de feltro (roleta e dado) ---- */
+.resultado.feltro {
+  background: radial-gradient(ellipse at center, #1b6b3a 0%, var(--feltro) 55%, var(--feltro-escuro) 100%);
+  color: var(--papel);
+  border: 8px solid var(--madeira);
+  box-shadow: inset 0 0 0 3px var(--dourado), 6px 6px 0 var(--anil-escuro);
+  padding: 1.5rem 1rem;
+}
+.feltro .ajuda { color: var(--papel-escuro); }
+.feltro .resultado-numero {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 5.2rem; height: 5.2rem; border-radius: 50%;
+  font-size: 2.6rem; border: 4px solid var(--dourado);
+  background: var(--tinta); color: var(--papel);
+}
+.feltro .resultado-numero.vermelho { background: var(--vermelho); color: var(--papel); }
+.feltro .resultado-numero.preto { background: #1b1b1b; color: var(--papel); }
+.feltro .resultado-numero.verde { background: var(--verde); color: var(--papel); }
+.feltro .carimbo { background: var(--papel-claro); padding: .2rem .7rem; }
+
+/* ---- Roleta ---- */
+.roleta-palco { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.5rem 2rem; align-items: center; justify-items: center; }
+.roleta-roda { position: relative; width: min(300px, 78vw); aspect-ratio: 1; margin: .5rem auto; }
+.roda-disco { width: 100%; height: 100%; display: block; transform-origin: 50% 50%; }
+.roda-disco.girando { transition: transform 4.2s cubic-bezier(.15, .7, .1, 1); }
+.roda-bola { position: absolute; inset: 0; transform-origin: 50% 50%; pointer-events: none; z-index: 1; }
+.roda-bola.girando { transition: transform 3.9s cubic-bezier(.1, .75, .15, 1); }
+.roda-bola span {
+  position: absolute; left: 50%; top: 5.5%; width: 7%; height: 7%;
+  margin-left: -3.5%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff, #bfbfbf 60%, #8a8a8a);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .5);
+}
+.roda-ponteiro {
+  position: absolute; left: 50%; top: -6px; margin-left: -9px; z-index: 2;
+  width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent;
+  border-top: 16px solid var(--papel); filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .5));
+}
+.roleta-leitura { text-align: center; }
+
+/* ---- Caça-níquel ---- */
+.resultado.maquina {
+  background: linear-gradient(180deg, #8d2424, var(--cabine) 60%, #5c1515);
+  color: var(--papel);
+  border: 8px solid var(--dourado);
+  box-shadow: inset 0 0 0 3px #5c1515, 6px 6px 0 var(--anil-escuro);
+  padding: .9rem 1rem 1.4rem;
+}
+.maquina-painel { display: flex; align-items: center; justify-content: center; gap: .9rem; margin-bottom: .9rem; }
+.maquina-titulo { font-family: var(--display); text-transform: uppercase; letter-spacing: .12em; color: var(--dourado); font-size: 1.1rem; }
+.maquina-luz { width: 14px; height: 14px; border-radius: 50%; background: #ffd54f; box-shadow: 0 0 8px #ffd54f; }
+.maquina:not(.revelado) .maquina-luz { animation: piscar .5s steps(2, start) infinite; }
+.maquina.revelado .maquina-luz:nth-child(3) { animation: piscar .5s steps(2, start) 6; }
+@keyframes piscar { to { opacity: .15; box-shadow: none; } }
+.maquina .rolos {
+  position: relative; background: #fff; border: 4px solid var(--tinta); border-radius: 6px;
+  padding: .7rem .5rem; gap: .5rem; margin: 0 auto .9rem; width: fit-content; max-width: 100%;
+  box-shadow: inset 0 10px 14px rgba(0, 0, 0, .25), inset 0 -10px 14px rgba(0, 0, 0, .25);
+}
+.maquina .rolos::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px;
+  background: var(--vermelho); opacity: .55; z-index: 1;
+}
+.maquina .rolo { background: transparent; border: 0; border-right: 2px solid #ddd; min-width: 4.2rem; padding: .3rem .4rem; }
+.maquina .rolo:last-child { border-right: 0; }
+.rolo.girando { filter: blur(1.6px); animation: tremer .12s linear infinite; }
+@keyframes tremer { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+.rolo.parou { animation: travar .25s ease-out; }
+@keyframes travar { from { transform: scale(1.25) translateY(-6px); } to { transform: none; } }
+.maquina .carimbo { background: var(--papel-claro); padding: .2rem .7rem; }
+
+/* ---- Dado ---- */
+.dado-palco { display: flex; justify-content: center; padding: 1rem 0 1.4rem; }
+.dado-cubo {
+  width: 112px; height: 112px; padding: 13px; gap: 5px;
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+  background: linear-gradient(145deg, #fff, #ececec); border-radius: 18px;
+  box-shadow: inset -5px -5px 0 #d6d6d6, 8px 10px 0 rgba(0, 0, 0, .4);
+}
+.pip { width: 20px; height: 20px; border-radius: 50%; background: #1b1b1b; place-self: center; visibility: hidden; box-shadow: inset 2px 2px 2px rgba(255, 255, 255, .25); }
+.face-1 .pip:nth-child(5),
+.face-2 .pip:nth-child(3), .face-2 .pip:nth-child(7),
+.face-3 .pip:nth-child(3), .face-3 .pip:nth-child(5), .face-3 .pip:nth-child(7),
+.face-4 .pip:nth-child(1), .face-4 .pip:nth-child(3), .face-4 .pip:nth-child(7), .face-4 .pip:nth-child(9),
+.face-5 .pip:nth-child(1), .face-5 .pip:nth-child(3), .face-5 .pip:nth-child(5), .face-5 .pip:nth-child(7), .face-5 .pip:nth-child(9),
+.face-6 .pip:nth-child(1), .face-6 .pip:nth-child(3), .face-6 .pip:nth-child(4), .face-6 .pip:nth-child(6), .face-6 .pip:nth-child(7), .face-6 .pip:nth-child(9) { visibility: visible; }
+.dado-cubo.rolando { animation: rolar .55s linear infinite; }
+@keyframes rolar {
+  0% { transform: rotate(0) translateY(0); }
+  25% { transform: rotate(90deg) translateY(-22px); }
+  50% { transform: rotate(180deg) translateY(0); }
+  75% { transform: rotate(270deg) translateY(-12px); }
+  100% { transform: rotate(360deg) translateY(0); }
+}
+.dado-cubo.parou { animation: pousar .45s cubic-bezier(.2, .9, .3, 1.3); }
+@keyframes pousar { from { transform: translateY(-26px) rotate(-12deg); } to { transform: none; } }
+
+/* ---- Poste do bicho ---- */
+.poste .premios li { position: relative; overflow: hidden; }
+.premio .milhar { display: inline-flex; gap: .08em; }
+.digito { display: inline-block; width: .7em; text-align: center; }
+.digito.dezena { color: var(--vermelho); }
+.premio.girando .digito:not(.fixo) { color: var(--tinta-fraca); filter: blur(.8px); animation: tremer .1s linear infinite; }
+.digito.fixo { animation: fixar .22s ease-out; }
+@keyframes fixar { from { transform: scale(1.5) translateY(-4px); } to { transform: none; } }
+.premio.revelado .animal { animation: surgir .35s ease-out; }
+@keyframes surgir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.poste-cabeca { font-size: 1.25rem; margin: .5rem 0 0; }
+.poste-cabeca strong { font-family: var(--display); font-weight: 400; letter-spacing: .04em; text-transform: uppercase; color: var(--vermelho); font-size: 1.5rem; }
+.poste.revelado .poste-cabeca { animation: surgir .4s ease-out; }
+
+@media (max-width: 760px) {
+  .roleta-palco { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .roda-disco.girando, .roda-bola.girando { transition: none; }
+}
+
+/* Enquanto o poste revela, a tabela de apostas não entrega o resultado. */
+.js:has([data-animar-sorteio]:not(.revelado)) .minhas-apostas .carimbo,
+.js:has([data-animar-sorteio]:not(.revelado)) .minhas-apostas td:last-child { visibility: hidden; }

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}A banca sempre ganha{% endblock %}
+{% block content %}
+<section class="capa">
+  <div class="capa-texto">
+    <h1 class="letreiro">A banca sempre ganha.<br>Aqui você vê por quê.</h1>
+    <p>Aposte com fichas de mentira no jogo do bicho, na roleta, no caça-níquel e no dado. Cada jogo mostra a chance real de acertar, quanto paga e quanto fica com a casa. Depois de algumas rodadas, compare o seu saldo com a teoria.</p>
+    {% if user.is_authenticated %}
+      <p class="acoes">
+        <a class="botao" href="{% url 'bicho:index' %}">Apostar no bicho</a>
+        <a class="botao botao-linha" href="{% url 'learn:index' %}">Entender a matemática</a>
+      </p>
+    {% else %}
+      <p class="acoes">
+        <a class="botao" href="{% url 'core:signup' %}">Criar conta e ganhar F$ {{ initial_bonus|floatformat:0 }} em fichas</a>
+        <a class="botao botao-linha" href="{% url 'learn:index' %}">Entender a matemática</a>
+      </p>
+    {% endif %}
+  </div>
+
+  <div class="tabela-bichos" role="list" aria-label="Tabela dos 25 bichos">
+    {% for animal in animals %}
+      <div class="bicho" role="listitem">
+        <span class="bicho-grupo mono">{{ animal.code }}</span>
+        <span class="bicho-emoji" aria-hidden="true">{{ animal.emoji }}</span>
+        <span class="bicho-nome">{{ animal.name }}</span>
+        <span class="bicho-dezenas mono">{{ animal.dezenas.0 }}–{{ animal.dezenas.3 }}</span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="jogos">
+  <h2 class="letreiro letreiro-medio">Quatro jogos, uma mesma lição</h2>
+  <ul class="lista-jogos">
+    <li class="pule">
+      <h3><a href="{% url 'bicho:index' %}">Jogo do bicho</a></h3>
+      <p>Escolha grupo, dezena, centena ou milhar, espere a extração dos cinco prêmios e veja a banca pagar menos do que a chance justa.</p>
+      <p class="banca-leva-linha">Fica com a banca: <strong class="mono">{{ edges.bicho_min|floatformat:0 }}% a {{ edges.bicho_max|floatformat:0 }}%</strong></p>
+    </li>
+    <li class="pule">
+      <h3><a href="{% url 'casino:roulette' %}">Roleta europeia</a></h3>
+      <p>Trinta e sete casas, uma só é verde. É esse zero que garante o lucro da casa em qualquer aposta.</p>
+      <p class="banca-leva-linha">Fica com a banca: <strong class="mono">{{ edges.roulette|floatformat:1 }}%</strong></p>
+    </li>
+    <li class="pule">
+      <h3><a href="{% url 'casino:slots' %}">Caça-níquel</a></h3>
+      <p>Três rolos, uma tabela de prêmios e um retorno calculado exatamente a partir dos símbolos de cada rolo.</p>
+      <p class="banca-leva-linha">Fica com a banca: <strong class="mono">{{ edges.slots|floatformat:1 }}%</strong></p>
+    </li>
+    <li class="pule">
+      <h3><a href="{% url 'casino:dice' %}">Dado</a></h3>
+      <p>O exemplo mais simples: uma chance em seis de acertar, mas o prêmio paga como se fosse uma em cinco.</p>
+      <p class="banca-leva-linha">Fica com a banca: <strong class="mono">{{ edges.dice|floatformat:1 }}%</strong></p>
+    </li>
+  </ul>
+</section>
+{% endblock %}

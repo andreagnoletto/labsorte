@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Jogo do bicho{% endblock %}
+{% block content %}
+<h1 class="letreiro">Jogo do bicho</h1>
+
+<div class="duas-colunas">
+  <section aria-labelledby="tabela-titulo">
+    <h2 id="tabela-titulo" class="letreiro letreiro-medio">Tabela dos bichos</h2>
+    <p class="capa-texto">Cada bicho cobre quatro dezenas. O 1º prêmio decide o bicho da cabeça pelas duas últimas cifras. Clique num bicho para apostar no grupo.</p>
+    <div class="tabela-bichos" role="group" aria-label="Escolha um grupo">
+      {% for animal in animals %}
+        <button type="button" class="bicho" data-grupo="{{ animal.code }}" aria-pressed="false">
+          <span class="bicho-grupo mono">{{ animal.code }}</span>
+          <span class="bicho-emoji" aria-hidden="true">{{ animal.emoji }}</span>
+          <span class="bicho-nome">{{ animal.name }}</span>
+          <span class="bicho-dezenas mono">{{ animal.dezenas.0 }}–{{ animal.dezenas.3 }}</span>
+        </button>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="pule" aria-labelledby="pule-titulo">
+    <h2 id="pule-titulo">Extração nº {{ draw.number }} aberta</h2>
+    <p>{{ pending_count }} aposta{{ pending_count|pluralize }} aguardando o sorteio.
+      {% if last_draw %}A última extração foi a nº {{ last_draw.number }}.{% else %}Ainda não houve sorteio.{% endif %}</p>
+
+    {% if user.is_authenticated %}
+      <form method="post" id="form-aposta" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<ul class="erro-lista">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        <div class="campo">
+          <span class="rotulo" id="rotulo-modalidade">{{ form.modality.label }}</span>
+          <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-modalidade">
+            {% for radio in form.modality %}<label>{{ radio.tag }} {{ radio.choice_label }}</label>{% endfor %}
+          </div>
+          {% if form.modality.errors %}<p class="erro">{{ form.modality.errors|striptags }}</p>{% endif %}
+        </div>
+        <div class="campo">
+          <span class="rotulo" id="rotulo-posicao">{{ form.position.label }}</span>
+          <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-posicao">
+            {% for radio in form.position %}<label>{{ radio.tag }} {{ radio.choice_label }}</label>{% endfor %}
+          </div>
+        </div>
+        <div class="campo">
+          <label for="{{ form.pick.id_for_label }}">{{ form.pick.label }}</label>
+          {{ form.pick }}
+          {% if form.pick.errors %}<p class="erro">{{ form.pick.errors|striptags }}</p>{% else %}<p class="ajuda">{{ form.pick.help_text }}</p>{% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.stake.id_for_label }}">{{ form.stake.label }}</label>
+          {{ form.stake }}
+          {% if form.stake.errors %}<p class="erro">{{ form.stake.errors|striptags }}</p>{% else %}<p class="ajuda">{{ form.stake.help_text }}</p>{% endif %}
+        </div>
+        <button type="submit" class="botao">Registrar aposta</button>
+      </form>
+      <hr>
+      <form method="post" action="{% url 'bicho:draw' %}">
+        {% csrf_token %}
+        <p>Quando quiser ver o resultado, faça o sorteio. Ele encerra a extração atual, paga quem acertou e abre a próxima.</p>
+        <button type="submit" class="botao botao-linha">Sortear agora</button>
+      </form>
+    {% else %}
+      <p>Para apostar, <a href="{% url 'login' %}?next={% url 'bicho:index' %}">entre</a> ou <a href="{% url 'core:signup' %}">crie uma conta</a>. Você recebe fichas fictícias na hora.</p>
+    {% endif %}
+  </section>
+</div>
+
+{% if last_draw %}
+<section class="pule poste" aria-labelledby="ultima-titulo" aria-live="polite"{% if animate_draw %} data-animar-sorteio{% endif %}>
+  <h2 id="ultima-titulo">Deu no poste: extração nº {{ last_draw.number }}</h2>
+  <ol class="premios">
+    {% for prize, animal in last_draw.prize_animals %}
+      <li class="premio">
+        <span class="ordem">{{ forloop.counter }}º prêmio</span>
+        <span class="milhar">{% for d in prize %}<span class="digito{% if forloop.counter > 2 %} dezena{% endif %}" data-final="{{ d }}">{{ d }}</span>{% endfor %}</span>
+        <span class="animal">{{ animal.emoji }} {{ animal.code }} {{ animal.name }}</span>
+      </li>
+    {% endfor %}
+  </ol>
+  {% with head=last_draw.prize_animals.0 %}
+  <p class="poste-cabeca">Deu <strong>{{ head.1.emoji }} {{ head.1.name }}</strong> na cabeça.</p>
+  {% endwith %}
+  <p class="ajuda">A dezena em vermelho define o bicho. <a href="{% url 'bicho:history' %}">Ver extrações anteriores</a></p>
+</section>
+{% endif %}
+
+{% if my_bets %}
+<section class="pule minhas-apostas" aria-labelledby="minhas-titulo">
+  <h2 id="minhas-titulo">Minhas apostas</h2>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Extração</th><th>Aposta</th><th>Posição</th><th class="num">Valor</th><th class="num">Paga</th><th>Situação</th><th class="num">Prêmio</th></tr></thead>
+    <tbody>
+    {% for bet in my_bets %}
+      <tr>
+        <td class="mono">nº {{ bet.draw.number }}</td>
+        <td>{{ bet.get_modality_display }} <span class="mono">{{ bet.pick_label }}</span></td>
+        <td>{{ bet.position_short }}</td>
+        <td class="num">F$ {{ bet.stake|floatformat:0 }}</td>
+        <td class="num">{{ bet.multiplier|floatformat:0 }}x</td>
+        <td>
+          {% if bet.status == "WON" %}<span class="carimbo carimbo-ganhou">Premiada</span>
+          {% elif bet.status == "LOST" %}<span class="carimbo carimbo-perdeu">Não premiada</span>
+          {% else %}<span class="carimbo carimbo-pendente">Aguardando sorteio</span>{% endif %}
+        </td>
+        <td class="num">{% if bet.payout %}F$ {{ bet.payout }}{% else %}—{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endif %}
+
+<section class="pule" aria-labelledby="odds-titulo">
+  <h2 id="odds-titulo">Quanto paga, quanto deveria pagar</h2>
+  <p>Na cabeça, só vale o 1º prêmio. Do 1º ao 5º, cada prêmio acertado paga um quinto do multiplicador, então a vantagem da banca é a mesma nas duas posições.</p>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Modalidade</th><th class="num">Chance</th><th class="num">Paga</th><th class="num">Pagamento justo</th><th class="num">Retorno esperado</th><th class="num">Fica com a banca</th></tr></thead>
+    <tbody>
+    {% for row in table %}
+      <tr>
+        <td>{{ row.label }}</td>
+        <td class="num">1 em {{ row.one_in }}</td>
+        <td class="num">{{ row.multiplier|floatformat:0 }}x</td>
+        <td class="num">{{ row.fair_multiplier }}x</td>
+        <td class="num">{{ row.expected_return_pct|floatformat:0 }}%</td>
+        <td class="num banca-leva">{{ row.house_edge_pct|floatformat:0 }}%</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="ajuda">Retorno esperado = chance × pagamento. O que falta para 100% é a vantagem da banca. <a href="{% url 'learn:index' %}">Entenda a conta</a>.</p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var form = document.getElementById("form-aposta");
+  if (!form) return;
+  var pick = form.querySelector("[name=pick]");
+  var buttons = document.querySelectorAll(".tabela-bichos button.bicho");
+  function marcar(codigo) {
+    buttons.forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.grupo === codigo ? "true" : "false"); });
+  }
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var grupo = form.querySelector("[name=modality][value=GRUPO]");
+      if (grupo) grupo.checked = true;
+      pick.value = b.dataset.grupo;
+      marcar(b.dataset.grupo);
+      pick.focus();
+    });
+  });
+  form.querySelectorAll("[name=modality]").forEach(function (r) {
+    r.addEventListener("change", function () { if (r.value !== "GRUPO") marcar(null); });
+  });
+  if (pick.value && form.querySelector("[name=modality]:checked") && form.querySelector("[name=modality]:checked").value === "GRUPO") marcar(pick.value);
+})();
+</script>
+{% endblock %}

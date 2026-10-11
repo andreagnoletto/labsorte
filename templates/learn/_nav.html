@@ -1,0 +1,9 @@
+{% load static %}
+<nav class="aprenda-nav" aria-label="Páginas da seção Aprenda">
+  <a href="{% url 'learn:index' %}"{% if current == "index" %} aria-current="page"{% endif %}>Visão geral</a>
+  <a href="{% url 'learn:bicho' %}"{% if current == "bicho" %} aria-current="page"{% endif %}>Como funciona o bicho</a>
+  <a href="{% url 'learn:probability' %}"{% if current == "probability" %} aria-current="page"{% endif %}>Probabilidade e valor esperado</a>
+  <a href="{% url 'learn:fallacies' %}"{% if current == "fallacies" %} aria-current="page"{% endif %}>Falácias do apostador</a>
+  <a href="{% url 'learn:simulator' %}"{% if current == "simulator" %} aria-current="page"{% endif %}>Simulador</a>
+  <a href="{% url 'learn:legal' %}"{% if current == "legal" %} aria-current="page"{% endif %}>Lei e jogo responsável</a>
+</nav>

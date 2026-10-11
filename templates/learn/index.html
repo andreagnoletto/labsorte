@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Aprenda{% endblock %}
+{% block content %}
+<h1 class="letreiro">Aprenda</h1>
+{% include "learn/_nav.html" with current="index" %}
+
+<section class="pule">
+  <h2>A regra que vale para todos os jogos</h2>
+  <p>Todo jogo de azar tem duas quantidades: a <strong>chance</strong> de ganhar e o <strong>pagamento</strong> quando se ganha. O pagamento justo seria o inverso da chance: uma chance em 25 pediria um prêmio de 25 vezes a aposta. A banca paga menos do que isso. A diferença, em porcentagem do que é apostado, é a <strong>vantagem da banca</strong>, e ela não depende de sorte, de palpite nem de estratégia.</p>
+  <p>Jogos legalizados, como a roleta, costumam ter vantagem pequena e lucram pelo volume. O jogo do bicho, sem regulação, paga muito abaixo do justo nas modalidades mais procuradas.</p>
+</section>
+
+<section class="pule">
+  <h2>Fica com a banca, jogo a jogo</h2>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Jogo</th><th>Aposta</th><th class="num">Chance</th><th class="num">Paga</th><th class="num">Justo</th><th class="num">Fica com a banca</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.game }}</td>
+        <td>{{ row.bet }}</td>
+        <td class="num">{% if row.probability %}{{ row.probability.numerator }} em {{ row.probability.denominator }}{% else %}várias{% endif %}</td>
+        <td class="num">{% if row.multiplier %}{{ row.multiplier|floatformat:0 }}x{% else %}tabela{% endif %}</td>
+        <td class="num">{% if row.fair %}{{ row.fair|floatformat:2 }}x{% else %}—{% endif %}</td>
+        <td class="num banca-leva">{{ row.edge_pct|floatformat:1 }}%</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="ajuda">Todos os números desta tabela são calculados pelo código dos próprios jogos deste site, não digitados à mão.</p>
+</section>
+
+<section class="pule">
+  <h2>Por onde começar</h2>
+  <ul class="lista-simples">
+    <li><a href="{% url 'learn:bicho' %}">Como funciona o jogo do bicho</a>: a tabela dos 25 bichos, as modalidades e a extração.</li>
+    <li><a href="{% url 'learn:probability' %}">Probabilidade e valor esperado</a>: a conta de 100 apostas, passo a passo.</li>
+    <li><a href="{% url 'learn:fallacies' %}">Falácias do apostador</a>: número atrasado, maré de sorte, dobrar a aposta.</li>
+    <li><a href="{% url 'learn:simulator' %}">Simulador</a>: milhares de apostas em um segundo, com gráfico.</li>
+    <li><a href="{% url 'learn:legal' %}">Lei e jogo responsável</a>: o que diz a lei brasileira e onde buscar ajuda.</li>
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Entrar{% endblock %}
+{% block content %}
+<section class="pule formulario-conta">
+  <h1 class="letreiro letreiro-medio">Entrar</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<p class="erro">{{ form.non_field_errors|striptags }}</p>{% endif %}
+    {% for field in form %}
+      <div class="campo">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.errors %}<p class="erro">{{ field.errors|striptags }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="botao">Entrar</button>
+  </form>
+  <p class="ajuda">Ainda não tem conta? <a href="{% url 'core:signup' %}">Criar conta</a></p>
+</section>
+{% endblock %}

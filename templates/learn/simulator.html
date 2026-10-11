@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% block title %}Simulador{% endblock %}
+{% block content %}
+<h1 class="letreiro">Simulador de milhares de apostas</h1>
+{% include "learn/_nav.html" with current="simulator" %}
+
+<div class="duas-colunas">
+  <section class="pule">
+    <h2>Monte a simulação</h2>
+    <p>O computador aposta F$ 1 por rodada, no mesmo jogo, quantas vezes você pedir. Não mexe na sua carteira.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="campo">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<p class="erro">{{ field.errors|striptags }}</p>{% elif field.help_text %}<p class="ajuda">{{ field.help_text }}</p>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="botao">Simular</button>
+    </form>
+  </section>
+
+  <section class="pule">
+    <h2>O que observar</h2>
+    <ul class="lista-simples">
+      <li>Com 100 apostas, o resultado real pode ficar bem longe da teoria, para cima ou para baixo.</li>
+      <li>Com 50000, a linha azul (seu saldo) gruda na linha vermelha (a previsão da matemática).</li>
+      <li>A maior sequência de derrotas mostra por que "dobrar a aposta" quebra o apostador.</li>
+      <li>Na milhar, é comum terminar 100 apostas sem um único acerto. Com 50000, os acertos aparecem, e o saldo continua negativo.</li>
+    </ul>
+  </section>
+</div>
+
+{% if result %}
+<section class="pule" aria-live="polite">
+  <h2>{{ result.label }}: {{ result.rounds }} apostas de F$ 1</h2>
+  <div class="estatisticas">
+    <div class="estatistica"><span>Apostado</span><strong>F$ {{ result.staked }}</strong></div>
+    <div class="estatistica"><span>Recebido</span><strong>F$ {{ result.returned }}</strong></div>
+    <div class="estatistica"><span>Saldo final</span><strong class="{% if result.net < 0 %}negativo{% elif result.net > 0 %}positivo{% endif %}">F$ {{ result.net }}</strong></div>
+    <div class="estatistica"><span>Retorno real</span><strong>{{ result.return_pct|floatformat:1 }}%</strong></div>
+    <div class="estatistica"><span>Retorno teórico</span><strong>{{ result.theoretical_pct|floatformat:1 }}%</strong></div>
+    <div class="estatistica"><span>Apostas ganhas</span><strong>{{ result.wins }} ({{ result.win_pct|floatformat:1 }}%)</strong></div>
+    <div class="estatistica"><span>Maior sequência de derrotas</span><strong>{{ result.longest_losing_streak }}</strong></div>
+    <div class="estatistica"><span>Melhor momento</span><strong>F$ {{ result.peak }}</strong></div>
+    <div class="estatistica"><span>Pior momento</span><strong>F$ {{ result.trough }}</strong></div>
+  </div>
+  {% localize off %}
+  <svg class="grafico" viewBox="-4 -4 {{ chart.width|add:8 }} {{ chart.height|add:8 }}" role="img" aria-label="Saldo acumulado ao longo das {{ result.rounds }} apostas, de F$ {{ chart.min }} a F$ {{ chart.max }}; saldo final F$ {{ result.net }}, previsão teórica F$ {{ result.expected_net|floatformat:0 }}">
+    {% if chart.baseline_y is not None %}
+      <line x1="0" y1="{{ chart.baseline_y }}" x2="{{ chart.width }}" y2="{{ chart.baseline_y }}" stroke="#4a4a4a" stroke-width="1"/>
+    {% endif %}
+    {% for pts in chart.extra_points %}
+      <polyline points="{{ pts }}" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="8 6"/>
+    {% endfor %}
+    <polyline points="{{ chart.points }}" fill="none" stroke="#1f3a73" stroke-width="2.5" stroke-linejoin="round"/>
+  </svg>
+  {% endlocalize %}
+  <p class="ajuda">Linha azul: saldo acumulado. Linha vermelha tracejada: o que a matemática prevê, terminando em F$ {{ result.expected_net|floatformat:0 }}. Linha cinza: zero. Escala de F$ {{ chart.min|floatformat:0 }} a F$ {{ chart.max|floatformat:0 }}.</p>
+</section>
+{% endif %}
+{% endblock %}

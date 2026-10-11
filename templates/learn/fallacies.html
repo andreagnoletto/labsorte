@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Falácias do apostador{% endblock %}
+{% block content %}
+<h1 class="letreiro">Falácias do apostador</h1>
+{% include "learn/_nav.html" with current="fallacies" %}
+
+<section class="pule">
+  <h2>"Esse número está atrasado"</h2>
+  <p>A ideia: se o Leão não sai há semanas, "está na hora" dele. A realidade: cada extração é um sorteio novo, sem memória. A chance do Leão é 1 em 25 hoje, era 1 em 25 ontem e continuará 1 em 25 depois de 50 extrações sem ele. Bolas, dados e roletas não sabem o que saiu antes. Esse erro tem nome, falácia do apostador, e a lenda do número atrasado é a versão mais popular dele.</p>
+</section>
+
+<section class="pule">
+  <h2>"Estou numa maré de sorte"</h2>
+  <p>O contrário também não funciona. Ganhar três vezes seguidas não muda a probabilidade da quarta. Sequências de vitórias e de derrotas são normais em qualquer sorteio independente; nós é que enxergamos padrão onde há acaso. O <a href="{% url 'learn:simulator' %}">simulador</a> mostra a maior sequência de derrotas de cada rodada: ela costuma ser mais longa do que a intuição espera.</p>
+</section>
+
+<section class="pule">
+  <h2>"Se perder, dobro a aposta"</h2>
+  <p>Chamam de martingale: aposte 1 no vermelho; se perder, aposte 2; depois 4, 8, 16... Quando ganhar, recupera tudo e lucra 1. Parece infalível, e no papel é, desde que você tenha dinheiro infinito e a banca aceite apostas de qualquer tamanho. Nenhuma das duas coisas é verdade. Depois de 10 derrotas seguidas (acontece), a próxima aposta é 1024 vezes a inicial. A sequência de perdas que quebra o jogador chega mais cedo ou mais tarde, e quando chega leva tudo o que os pequenos lucros anteriores somaram. O valor esperado de cada aposta continua negativo; dobrar só redistribui as perdas no tempo.</p>
+</section>
+
+<section class="pule">
+  <h2>"Quase ganhei"</h2>
+  <p>No caça-níquel, dois diamantes e um limão parecem um quase-prêmio. Não são: é só uma das combinações perdedoras, igual a qualquer outra. Máquinas são desenhadas para mostrar quase-acertos com frequência porque isso faz as pessoas continuarem jogando. No bicho, a milhar 1235 quando saiu 1234 também é uma derrota comum, não um sinal.</p>
+</section>
+
+<section class="pule">
+  <h2>"Conheço alguém que ganhou muito"</h2>
+  <p>Com milhares de apostadores, alguém sempre acerta a milhar, e a história de quem ganhou circula; as de quem perdeu, não. A banca conta com isso. A pergunta útil não é "alguém ganhou?", e sim "quanto todos juntos apostaram e quanto a banca devolveu?". A resposta está na vantagem da banca de cada jogo, e na sua <a href="{% url 'wallet:dashboard' %}">carteira</a>, que compara o que você recebeu com o que a teoria previa.</p>
+</section>
+
+<section class="pule">
+  <h2>"Com sistema, dá para vencer"</h2>
+  <p>Trocar de número, apostar nos "quentes", seguir a tabela dos sonhos, apostar só às quartas: nada disso altera a probabilidade nem o pagamento, e a vantagem da banca é feita só dessas duas coisas. Um sistema pode mudar o tamanho e a frequência das oscilações, nunca a média. A única jogada com valor esperado positivo é não apostar.</p>
+</section>
+{% endblock %}

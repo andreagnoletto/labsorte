@@ -1,0 +1,31 @@
+{% if recent %}
+<section class="pule" aria-labelledby="recentes-titulo">
+  <h2 id="recentes-titulo">Minhas últimas rodadas</h2>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Quando</th><th>Aposta</th><th>Saiu</th><th class="num">Valor</th><th class="num">Prêmio</th><th class="num">Resultado</th></tr></thead>
+    <tbody>
+    {% for round in recent %}
+      <tr>
+        <td class="mono">{{ round.created_at|date:"d/m H:i" }}</td>
+        <td>
+          {% if round.game == "ROULETTE" %}{{ round.details.label }}
+          {% elif round.game == "DICE" %}Face {{ round.details.pick }}
+          {% else %}Giro{% endif %}
+        </td>
+        <td>
+          {% if round.game == "ROULETTE" %}<span class="mono">{{ round.details.number }}</span> {{ round.details.color }}
+          {% elif round.game == "DICE" %}<span class="mono">{{ round.details.result }}</span>
+          {% else %}{{ round.details.symbols|join:" " }}{% endif %}
+        </td>
+        <td class="num">F$ {{ round.stake|floatformat:0 }}</td>
+        <td class="num">{% if round.won %}F$ {{ round.payout }}{% else %}—{% endif %}</td>
+        <td class="num {% if round.net < 0 %}negativo{% else %}positivo{% endif %}">{{ round.net|floatformat:2 }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="ajuda">Resultado = prêmio − valor apostado. <a href="{% url 'wallet:dashboard' %}">Ver o balanço completo na carteira</a>.</p>
+</section>
+{% endif %}

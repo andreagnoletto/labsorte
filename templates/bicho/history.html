@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Extrações{% endblock %}
+{% block content %}
+<h1 class="letreiro">Extrações</h1>
+<p class="capa-texto">As últimas 50 extrações, da mais recente para a mais antiga. <a href="{% url 'bicho:index' %}" style="color: var(--papel)">Voltar para a banca</a>.</p>
+{% for draw in draws %}
+  <section class="pule">
+    <h2>Extração nº {{ draw.number }} <small class="ajuda" style="display:inline">sorteada em {{ draw.drawn_at|date:"d/m/Y H:i" }}</small></h2>
+    <ol class="premios">
+      {% for prize, animal in draw.prize_animals %}
+        <li>
+          <span class="ordem">{{ forloop.counter }}º prêmio</span>
+          <span class="milhar">{{ prize|slice:":2" }}<em>{{ prize|slice:"2:" }}</em></span>
+          <span class="animal">{{ animal.emoji }} {{ animal.code }} {{ animal.name }}</span>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+{% empty %}
+  <section class="pule"><p>Nenhuma extração foi sorteada ainda. <a href="{% url 'bicho:index' %}">Aposte e sorteie a primeira</a>.</p></section>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,278 @@
+/* Jogo do Bixo — folha de estilo
+   Direção: pintura de letreiro popular (azul-anil, vermelho, amarelo),
+   papel de pule amarelo com números em máquina de escrever. */
+
+:root {
+  --anil: #1f3a73;
+  --anil-escuro: #142750;
+  --anil-claro: #2d4f96;
+  --papel: #f6e7a6;
+  --papel-claro: #fbf3cf;
+  --papel-escuro: #e4d08a;
+  --tinta: #000000;
+  --tinta-fraca: #4a4a4a;
+  --vermelho: #c62828;
+  --vermelho-escuro: #8e1b1b;
+  --verde: #2e7d32;
+  --branco: #ffffff;
+  --display: Impact, "Arial Narrow Bold", "Arial Narrow", Haettenschweiler, "Franklin Gothic Medium", sans-serif;
+  --texto: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "Courier New", "Courier Prime", ui-monospace, Menlo, Consolas, monospace;
+  --medida: 70ch;
+  --gutter: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--anil);
+  color: var(--tinta);
+  font-family: var(--texto);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+a { color: var(--anil-escuro); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--vermelho);
+  outline-offset: 2px;
+}
+
+.pular {
+  position: absolute; left: -999px; top: 0;
+  background: var(--papel); color: var(--tinta); padding: .5rem 1rem;
+}
+.pular:focus { left: 8px; top: 8px; z-index: 10; }
+
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.inline { display: inline; }
+
+/* ---- Cabeçalho: a placa da banca ---- */
+.banca {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem;
+  padding: .75rem var(--gutter);
+  background: var(--anil-escuro);
+  border-bottom: 6px solid var(--vermelho);
+}
+.banca-nome {
+  font-family: var(--display);
+  font-size: 1.9rem;
+  letter-spacing: .04em;
+  color: var(--papel);
+  text-decoration: none;
+  text-transform: uppercase;
+  text-shadow: 3px 3px 0 var(--vermelho);
+}
+.banca-nav { display: flex; flex-wrap: wrap; gap: .25rem 1rem; flex: 1; }
+.banca-nav a {
+  color: var(--papel); text-decoration: none; font-weight: 600;
+  border-bottom: 2px solid transparent; padding: .1rem 0;
+}
+.banca-nav a:hover, .banca-nav a[aria-current="page"] { border-bottom-color: var(--papel); }
+.banca-conta { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.saldo {
+  display: inline-flex; flex-direction: column; line-height: 1.15;
+  background: var(--papel); color: var(--tinta); text-decoration: none;
+  padding: .3rem .6rem; border: 2px dashed var(--tinta-fraca);
+}
+.saldo span { font-size: .72rem; color: var(--tinta-fraca); }
+.saldo strong { font-size: 1.05rem; }
+
+.aviso {
+  margin: 0; padding: .45rem var(--gutter);
+  background: var(--papel); color: var(--tinta);
+  font-size: .9rem; text-align: center;
+  border-bottom: 2px solid var(--papel-escuro);
+}
+
+/* ---- Página ---- */
+.pagina {
+  max-width: 1100px; margin: 0 auto; padding: 1.5rem var(--gutter) 3rem;
+}
+.rodape {
+  max-width: 1100px; margin: 0 auto; padding: 1rem var(--gutter) 2rem;
+  color: var(--papel); font-size: .85rem; opacity: .9;
+}
+
+.letreiro {
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  line-height: 1.02;
+  color: var(--papel);
+  text-shadow: 4px 4px 0 var(--vermelho);
+  margin: 0 0 1rem;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+}
+.letreiro-medio { font-size: clamp(1.6rem, 4vw, 2.4rem); text-shadow: 3px 3px 0 var(--vermelho); }
+.pule .letreiro, .pule .letreiro-medio { color: var(--anil-escuro); text-shadow: 2px 2px 0 var(--vermelho); }
+
+.capa { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 2rem; align-items: start; }
+.capa-texto { color: var(--papel); max-width: var(--medida); }
+.capa-texto p { font-size: 1.08rem; }
+.acoes { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+/* ---- Tabela dos bichos: o elemento principal ---- */
+.tabela-bichos {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px; padding: 4px;
+  background: var(--tinta);
+  border: 4px solid var(--papel);
+}
+.bicho {
+  display: grid;
+  grid-template-columns: auto 1fr; grid-template-rows: auto auto;
+  gap: 0 .35rem; align-items: center;
+  background: var(--papel-claro); color: var(--tinta);
+  padding: .4rem .45rem; min-height: 4.6rem;
+  font: inherit; text-align: left; border: 0; cursor: default; min-width: 0;
+}
+.bicho-grupo { grid-row: 1 / span 2; font-size: 1.1rem; font-weight: 700; color: var(--vermelho); }
+.bicho-emoji { font-size: 1.5rem; line-height: 1; grid-column: 2; }
+.bicho-nome {
+  grid-column: 2; font-family: var(--display); text-transform: uppercase;
+  letter-spacing: .02em; font-size: .85rem; line-height: 1.1; color: var(--anil-escuro); overflow-wrap: anywhere;
+}
+.bicho-dezenas { grid-column: 1 / span 2; font-size: .78rem; color: var(--tinta-fraca); margin-top: .2rem; }
+button.bicho { cursor: pointer; }
+button.bicho:hover { background: var(--papel); }
+button.bicho[aria-pressed="true"] { background: var(--vermelho); color: var(--papel); }
+button.bicho[aria-pressed="true"] .bicho-grupo,
+button.bicho[aria-pressed="true"] .bicho-nome,
+button.bicho[aria-pressed="true"] .bicho-dezenas { color: var(--papel); }
+
+/* ---- Pule: painel de papel ---- */
+.pule {
+  background: var(--papel-claro); color: var(--tinta);
+  padding: 1.25rem 1.5rem; margin: 0 0 1.5rem;
+  border-top: 4px dashed var(--papel-escuro);
+  box-shadow: 4px 4px 0 var(--anil-escuro);
+}
+.pule > :first-child { margin-top: 0; }
+.pule > :last-child { margin-bottom: 0; }
+.pule h2, .pule h3 { font-family: var(--display); text-transform: uppercase; letter-spacing: .03em; font-weight: 400; color: var(--anil-escuro); margin: 0 0 .5rem; }
+.pule h2 { font-size: 1.6rem; }
+.pule h3 { font-size: 1.3rem; }
+.pule h3 a { color: inherit; }
+.pule p { max-width: var(--medida); }
+
+.jogos { margin-top: 2.5rem; }
+.lista-jogos { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem; }
+.lista-jogos .pule { margin: 0; }
+.banca-leva-linha { margin: .5rem 0 0; font-size: .9rem; }
+.banca-leva-linha strong { color: var(--vermelho); font-size: 1.05rem; }
+
+.duas-colunas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+.formulario-conta { max-width: 32rem; margin: 0 auto; }
+
+/* ---- Formulários ---- */
+.campo { margin-bottom: .9rem; }
+.campo label { display: block; font-weight: 600; margin-bottom: .25rem; }
+input[type="text"], input[type="number"], input[type="password"], select {
+  width: 100%; max-width: 24rem;
+  font: inherit; font-family: var(--mono); font-size: 1.05rem;
+  padding: .5rem .6rem; border: 2px solid var(--tinta); background: var(--branco); color: var(--tinta);
+  border-radius: 0;
+}
+input[type="radio"], input[type="checkbox"] { accent-color: var(--vermelho); width: 1.1rem; height: 1.1rem; }
+.opcoes { display: flex; flex-wrap: wrap; gap: .4rem .9rem; }
+.opcoes label { font-weight: 500; display: inline-flex; gap: .35rem; align-items: center; }
+.ajuda { font-size: .88rem; color: var(--tinta-fraca); margin: .3rem 0 0; }
+.erro { color: var(--vermelho); font-weight: 600; margin: .3rem 0 0; }
+.erro-lista { color: var(--vermelho); font-weight: 600; margin: 0 0 .75rem; padding-left: 1.2rem; }
+
+.botao {
+  display: inline-block; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
+  padding: .55rem 1.1rem; border: 2px solid var(--vermelho-escuro);
+  background: var(--vermelho); color: var(--papel);
+  box-shadow: 3px 3px 0 var(--tinta);
+}
+.botao:hover { background: var(--vermelho-escuro); }
+.botao:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--tinta); }
+.botao-linha { background: transparent; color: inherit; border-color: currentColor; box-shadow: none; }
+.banca .botao-linha { color: var(--papel); }
+.botao-linha:hover { background: rgba(0, 0, 0, .08); }
+.botao-grande { font-size: 1.15rem; padding: .8rem 1.5rem; }
+
+/* ---- Tabelas de dados ---- */
+.dados { width: 100%; border-collapse: collapse; margin: .75rem 0 1rem; font-size: .95rem; }
+.dados th, .dados td { padding: .45rem .6rem; border-bottom: 1px solid var(--papel-escuro); text-align: left; vertical-align: top; }
+.dados th { font-weight: 700; color: var(--anil-escuro); border-bottom: 2px solid var(--anil-escuro); }
+.dados td.num, .dados th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dados .banca-leva { color: var(--vermelho); font-weight: 700; }
+.dados tr.destaque td { background: var(--papel); }
+.tabela-rolagem { overflow-x: auto; }
+
+/* ---- Mensagens e carimbos ---- */
+.mensagens { list-style: none; padding: 0; margin: 0 0 1.25rem; }
+.mensagem { padding: .6rem .9rem; margin-bottom: .5rem; background: var(--papel); border-left: 6px solid var(--anil-escuro); }
+.mensagem-success { border-left-color: var(--verde); }
+.mensagem-error { border-left-color: var(--vermelho); }
+.mensagem-warning { border-left-color: var(--vermelho); }
+
+.carimbo {
+  display: inline-block; font-family: var(--display); text-transform: uppercase; letter-spacing: .08em;
+  padding: .1rem .5rem; border: 3px solid currentColor; transform: rotate(-4deg);
+  font-size: 1.05rem; line-height: 1.3;
+}
+.carimbo-ganhou { color: var(--verde); }
+.carimbo-perdeu { color: var(--vermelho); }
+.carimbo-pendente { color: var(--anil-escuro); }
+
+/* ---- Resultado de rodada ---- */
+.resultado { text-align: center; padding: 1.5rem 1rem; background: var(--papel); border: 3px solid var(--tinta); margin-bottom: 1.25rem; }
+.resultado-numero { font-family: var(--mono); font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 700; line-height: 1; margin: .25rem 0; }
+.resultado-numero.vermelho { color: var(--vermelho); }
+.resultado-numero.preto { color: var(--tinta); }
+.resultado-numero.verde { color: var(--verde); }
+.rolos { display: flex; justify-content: center; gap: .75rem; margin: .5rem 0; }
+.rolo { font-size: clamp(2.5rem, 9vw, 4.5rem); line-height: 1; background: var(--branco); border: 3px solid var(--tinta); padding: .4rem .6rem; min-width: 5rem; }
+.premios { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; padding: 0; margin: .5rem 0; }
+.premios li { background: var(--branco); border: 2px solid var(--tinta); padding: .4rem .6rem; min-width: 7.5rem; text-align: center; }
+.premios .ordem { display: block; font-size: .75rem; color: var(--tinta-fraca); }
+.premios .milhar { display: block; font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
+.premios .milhar em { font-style: normal; color: var(--vermelho); }
+.premios .animal { display: block; font-size: .85rem; }
+
+.grafico { width: 100%; height: auto; display: block; background: var(--branco); border: 2px solid var(--tinta); }
+
+.estatisticas { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; margin: 1rem 0; }
+.estatistica { background: var(--papel); padding: .6rem .8rem; border: 2px solid var(--tinta); }
+.estatistica span { display: block; font-size: .8rem; color: var(--tinta-fraca); }
+.estatistica strong { font-family: var(--mono); font-size: 1.3rem; }
+.negativo { color: var(--vermelho); }
+.positivo { color: var(--verde); }
+
+.lista-simples { padding-left: 1.2rem; }
+.lista-simples li { margin-bottom: .4rem; }
+.destaque-texto { background: var(--papel); padding: .75rem 1rem; border-left: 6px solid var(--vermelho); max-width: var(--medida); }
+
+/* ---- Responsivo ---- */
+@media (max-width: 860px) {
+  .capa, .duas-colunas { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .banca-nome { font-size: 1.5rem; }
+  .bicho { min-height: 3.8rem; padding: .3rem; }
+  .bicho-emoji { font-size: 1.15rem; }
+  .bicho-nome { grid-column: 1 / span 2; font-size: .64rem; letter-spacing: 0; }
+  .bicho-grupo { font-size: .9rem; }
+  .bicho-dezenas { font-size: .62rem; }
+  .pule { padding: 1rem; }
+  .premios li { min-width: 5.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ---- Seção Aprenda ---- */
+.aprenda-nav { display: flex; flex-wrap: wrap; gap: .4rem .6rem; margin: 0 0 1.5rem; }
+.aprenda-nav a { color: var(--papel); background: var(--anil-escuro); text-decoration: none; padding: .35rem .7rem; border: 2px solid var(--papel); font-weight: 600; font-size: .92rem; }
+.aprenda-nav a[aria-current="page"] { background: var(--papel); color: var(--anil-escuro); }
+
+/* Títulos secundários que seguem um formulário dentro de uma pule */
+.pule form + h3, .pule table + h3 { margin-top: 1.25rem; }

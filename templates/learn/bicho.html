@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Como funciona o jogo do bicho{% endblock %}
+{% block content %}
+<h1 class="letreiro">Como funciona o jogo do bicho</h1>
+{% include "learn/_nav.html" with current="bicho" %}
+
+<section class="pule">
+  <h2>De onde veio</h2>
+  <p>O jogo nasceu no Rio de Janeiro, em 1892, como uma promoção do Jardim Zoológico do barão de Drummond: cada ingresso trazia o desenho de um bicho e, no fim do dia, um deles era sorteado e pagava prêmio. A brincadeira saiu do zoológico, virou aposta de rua e, mesmo proibida desde o início do século XX, segue presente em todo o país, operada por "bancas" que recebem as apostas em pontos e por telefone.</p>
+</section>
+
+<section class="pule">
+  <h2>A tabela dos 25 bichos</h2>
+  <p>Os números de 00 a 99 são divididos em 25 grupos de quatro dezenas. O grupo 1, Avestruz, fica com 01 a 04; o grupo 25, Vaca, com 97, 98, 99 e 00.</p>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th class="num">Grupo</th><th>Bicho</th><th>Dezenas</th></tr></thead>
+    <tbody>
+    {% for animal in animals %}
+      <tr><td class="num">{{ animal.code }}</td><td>{{ animal.emoji }} {{ animal.name }}</td><td class="mono">{{ animal.dezenas|join:", " }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="pule">
+  <h2>A extração</h2>
+  <p>Cada sorteio, chamado extração, produz cinco prêmios, cada um com quatro algarismos, de 0000 a 9999. O primeiro prêmio é a <strong>cabeça</strong>. As duas últimas cifras de um prêmio formam a dezena, e a dezena diz qual bicho "deu": se a cabeça foi 1234, a dezena é 34, que pertence ao grupo 9, Cobra.</p>
+  <p>Nas cidades grandes há várias extrações por dia, com nomes e horários fixos. No simulador, você mesmo faz a extração quando quiser, e cada uma recebe um número sequencial.</p>
+</section>
+
+<section class="pule">
+  <h2>As modalidades</h2>
+  <p>Você escolhe quantos algarismos quer acertar. Quanto mais algarismos, menor a chance e maior o pagamento, mas o pagamento cresce menos do que a chance diminui.</p>
+  <div class="tabela-rolagem">
+  <table class="dados">
+    <thead><tr><th>Modalidade</th><th>O que acertar</th><th class="num">Chance</th><th class="num">Paga</th><th class="num">Justo</th><th class="num">Fica com a banca</th></tr></thead>
+    <tbody>
+    {% for row in table %}
+      <tr>
+        <td>{{ row.label }}</td>
+        <td>{% if row.modality == "GRUPO" %}o bicho da cabeça{% elif row.modality == "DEZENA" %}os 2 últimos algarismos{% elif row.modality == "CENTENA" %}os 3 últimos algarismos{% else %}os 4 algarismos{% endif %}</td>
+        <td class="num">1 em {{ row.one_in }}</td>
+        <td class="num">{{ row.multiplier|floatformat:0 }}x</td>
+        <td class="num">{{ row.fair_multiplier }}x</td>
+        <td class="num banca-leva">{{ row.house_edge_pct|floatformat:0 }}%</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p><strong>Na cabeça</strong> só o 1º prêmio conta. <strong>Do 1º ao 5º</strong> (o "cercado"), os cinco prêmios contam, mas cada acerto paga um quinto do multiplicador. Como são cinco chances pagando um quinto, a vantagem da banca é exatamente a mesma: a aposta cercada só troca prêmios maiores e raros por prêmios menores e mais frequentes.</p>
+  <p class="ajuda">Os multiplicadores variam de banca para banca; estes são os valores mais comuns. Há ainda modalidades combinadas (duque e terno de grupo, por exemplo) que não entram neste simulador.</p>
+</section>
+{% endblock %}
